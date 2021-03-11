@@ -7,7 +7,7 @@ export function renderCube(canvas, THREE) {
     camera = new THREE.PerspectiveCamera(70, canvas.width / canvas.height, 1, 1000);
     camera.position.z = 400;
     scene = new THREE.Scene();
-    var texture = new THREE.TextureLoader().load('/assets/crate.png');
+    var texture = new THREE.TextureLoader().load('/assets/crate.gif');
     var geometry = new THREE.BoxBufferGeometry(200, 200, 200);
     var material = new THREE.MeshBasicMaterial({ map: texture });
     mesh = new THREE.Mesh(geometry, material);

@@ -18,11 +18,11 @@ Page({
         const canvas = res[0].node
         this.canvas = canvas
         const THREE = createScopedThreejs(canvas)
-        
-        // renderSphere(canvas, THREE)
-        // renderCube(canvas, THREE)
+
+        renderCube(canvas, THREE)
         // renderCubes(canvas, THREE)
-        renderModel(canvas, THREE)
+        // renderSphere(canvas, THREE)
+        // renderModel(canvas, THREE)
       })
   },
   touchStart(e) {
