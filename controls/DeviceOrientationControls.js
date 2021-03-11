@@ -1,10 +1,18 @@
+// 未在小程序版 three.js 里, 单独引入吧
+import { MathUtils } from '../utils/MathUtils'
+
 /**
  * W3C Device Orientation control (http://w3c.github.io/deviceorientation/spec-source-orientation.html)
  */
 
 var registerDeviceOrientationControls = function (THREE) {
 
-  const { Euler, EventDispatcher, MathUtils, Quaternion, Vector3 } = THREE
+  const { Euler, EventDispatcher, Quaternion, Vector3 } = THREE
+
+  const isAndroid = wx.getSystemInfoSync().platform == 'android'
+
+  // game 20ms, ui 60ms, normal 200ms
+  const deviceMotionInterval = 'game'
 
   var DeviceOrientationControls = function (object) {
 
@@ -24,13 +32,27 @@ var registerDeviceOrientationControls = function (THREE) {
 
     var onDeviceOrientationChangeEvent = function (event) {
 
-      scope.deviceOrientation = event
+      // 安卓上方向想反了, 取反一下
+      if (isAndroid) {
+        scope.deviceOrientation = {
+          alpha: -event.alpha,
+          beta: -event.beta,
+          gamma: -event.gamma,
+        }
+        return
+      }
 
+      scope.deviceOrientation = {
+        alpha: event.alpha,
+        beta: event.beta,
+        gamma: event.gamma,
+      }
     }
 
     var onScreenOrientationChangeEvent = function () {
 
-      scope.screenOrientation = window.orientation || 0
+      // 无 API 可用, 直接给 0, 似乎无影响
+      scope.screenOrientation = 0
 
     }
 
@@ -64,31 +86,17 @@ var registerDeviceOrientationControls = function (THREE) {
 
       onScreenOrientationChangeEvent() // run once on load
 
-      // iOS 13+
+      wx.onDeviceMotionChange(onDeviceOrientationChangeEvent)
 
-      if (window.DeviceOrientationEvent !== undefined && typeof window.DeviceOrientationEvent.requestPermission === 'function') {
-
-        window.DeviceOrientationEvent.requestPermission().then(function (response) {
-
-          if (response == 'granted') {
-
-            window.addEventListener('orientationchange', onScreenOrientationChangeEvent)
-            window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent)
-
-          }
-
-        }).catch(function (error) {
-
-          console.error('THREE.DeviceOrientationControls: Unable to use DeviceOrientation API:', error)
-
-        })
-
-      } else {
-
-        window.addEventListener('orientationchange', onScreenOrientationChangeEvent)
-        window.addEventListener('deviceorientation', onDeviceOrientationChangeEvent)
-
-      }
+      wx.startDeviceMotionListening({
+        interval: deviceMotionInterval,
+        success: function () {
+          console.log('startDeviceMotionListening', 'success')
+        },
+        fail: function (error) {
+          console.log('startDeviceMotionListening', error)
+        },
+      })
 
       scope.enabled = true
 
@@ -96,8 +104,16 @@ var registerDeviceOrientationControls = function (THREE) {
 
     this.disconnect = function () {
 
-      window.removeEventListener('orientationchange', onScreenOrientationChangeEvent)
-      window.removeEventListener('deviceorientation', onDeviceOrientationChangeEvent)
+      wx.offDeviceMotionChange(onDeviceOrientationChangeEvent)
+
+      wx.stopDeviceMotionListening({
+        success: function () {
+          console.log('stopDeviceMotionListening', 'success')
+        },
+        fail: function (error) {
+          console.log('stopDeviceMotionListening', error)
+        },
+      })
 
       scope.enabled = false
 

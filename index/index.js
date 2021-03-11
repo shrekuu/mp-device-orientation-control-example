@@ -11,6 +11,9 @@ const app = getApp()
 Page({
   data: {},
   onLoad: function () {
+
+    console.log('在手机上预览')
+
     wx.createSelectorQuery()
       .select('#webgl')
       .node()
