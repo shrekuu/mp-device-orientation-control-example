@@ -1,10 +1,18 @@
 export function renderCubes(canvas, THREE) {
-  var container, stats;
   var camera, scene, raycaster, renderer;
   var mouse = new THREE.Vector2(), INTERSECTED;
   var radius = 100, theta = 0;
+
+  var bricks = [];
+  var axesHelper;
+
+  const systemInfo = wx.getSystemInfoSync()
+  var touched = false
+
   init();
   animate();
+  bindEvents()
+
   function init() {
     camera = new THREE.PerspectiveCamera(70, canvas.width / canvas.height, 1, 10000);
     scene = new THREE.Scene();
@@ -12,6 +20,10 @@ export function renderCubes(canvas, THREE) {
     var light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(1, 1, 1).normalize();
     scene.add(light);
+
+    axesHelper = new THREE.AxesHelper(100)
+    scene.add(axesHelper)
+
     var geometry = new THREE.BoxBufferGeometry(20, 20, 20);
     for (var i = 0; i < 2000; i++) {
       var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff }));
@@ -24,6 +36,7 @@ export function renderCubes(canvas, THREE) {
       object.scale.x = Math.random() + 0.5;
       object.scale.y = Math.random() + 0.5;
       object.scale.z = Math.random() + 0.5;
+      bricks.push(object)
       scene.add(object);
     }
     raycaster = new THREE.Raycaster();
@@ -35,8 +48,9 @@ export function renderCubes(canvas, THREE) {
     canvas.requestAnimationFrame(animate);
     render();
   }
+
   function render() {
-    theta += 0.5;
+    theta += 0.1;
     camera.position.x = radius * Math.sin(THREE.Math.degToRad(theta));
     camera.position.y = radius * Math.sin(THREE.Math.degToRad(theta));
     camera.position.z = radius * Math.cos(THREE.Math.degToRad(theta));
@@ -44,8 +58,8 @@ export function renderCubes(canvas, THREE) {
     camera.updateMatrixWorld();
     // find intersections
     raycaster.setFromCamera(mouse, camera);
-    var intersects = raycaster.intersectObjects(scene.children);
-    if (intersects.length > 0) {
+    var intersects = raycaster.intersectObjects(bricks);
+    if (touched && intersects.length > 0) {
       if (INTERSECTED != intersects[0].object) {
         if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
         INTERSECTED = intersects[0].object;
@@ -57,5 +71,24 @@ export function renderCubes(canvas, THREE) {
       INTERSECTED = null;
     }
     renderer.render(scene, camera);
+  }
+
+  // events
+  function bindEvents () {
+
+    var onTouch = function(event) {
+
+      // normalize
+      mouse.x = (event.touches[0].clientX / systemInfo.windowWidth) * 2 - 1
+      mouse.y = -(event.touches[0].clientY / systemInfo.windowHeight) * 2 + 1
+      touched = true
+    }
+
+    renderer.domElement.addEventListener('touchstart', onTouch, false)
+    renderer.domElement.addEventListener('touchmove', onTouch, false)
+
+    renderer.domElement.addEventListener('touchend', function (event) {
+      touched = false
+    })
   }
 }
