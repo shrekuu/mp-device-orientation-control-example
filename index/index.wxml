@@ -8,7 +8,11 @@
             bindtouchend="touchEnd"
     ></canvas>
     <view class='actions'>
-        <view class='toggle-orientation-control' bind:tap="toggleOrientationControl">移动箱子</view>
-        <view class='toggle-orientation-control'>移动箱子</view>
+        <view class='toggle-cube-move'
+              wx:if="{{isMovingCube}}"
+              bind:tap="toggleCubeMove">放置箱子</view>
+        <view class='toggle-cube-move'
+              wx:else
+              bind:tap="toggleCubeMove">移动箱子</view>
     </view>
 </view>

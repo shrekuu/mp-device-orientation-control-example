@@ -8,8 +8,12 @@ const { renderModel } = require('../test-cases/model')
 
 const app = getApp()
 
+var cubeModel
+
 Page({
-  data: {},
+  data: {
+    isMovingCube: true,
+  },
   onLoad: function () {
 
     console.log('在手机上预览')
@@ -22,7 +26,7 @@ Page({
         this.canvas = canvas
         const THREE = createScopedThreejs(canvas)
 
-        renderCube(canvas, THREE)
+        cubeModel = renderCube(canvas, THREE)
         // renderCubes(canvas, THREE)
         // renderSphere(canvas, THREE)
         // renderModel(canvas, THREE)
@@ -36,5 +40,11 @@ Page({
   },
   touchEnd(e) {
     this.canvas.dispatchTouchEvent({...e, type:'touchend'})
+  },
+  toggleCubeMove()  {
+    this.setData({
+      isMovingCube: !this.data.isMovingCube
+    })
+    cubeModel.toggleCubeMove(this.data.isMovingCube)
   }
 })

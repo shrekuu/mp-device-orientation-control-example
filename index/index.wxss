@@ -18,3 +18,14 @@ page {
     left: 0;
     top: 0;
 }
+
+.container .actions .toggle-cube-move {
+    position: fixed;
+    left: 0;
+    bottom: 40px;
+    width: 100%;
+    background: rgba(255,255,255,.3);
+    line-height: 2;
+    text-align: center;
+    border: 1px solid red;
+}
